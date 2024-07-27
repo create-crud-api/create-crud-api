@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-export default function createRepository(projectName: string): void {
+export default function createPrismaRepository(projectName: string): void {
   const projectDir = path.join(process.cwd(), projectName);
-  fs.mkdirSync(path.join(projectDir, '/src/infrastructure/prisma'));
+  fs.mkdirSync(path.join(projectDir, '/src/infrastructure/prisma/prismaRepositories'), { recursive: true });
   fs.writeFileSync(
     path.join(projectDir, '/src/infrastructure/prisma/schema.prisma'),
     `generator client {
@@ -37,11 +37,11 @@ export default new PrismaClient();
   fs.writeFileSync(
     path.join(
       projectDir,
-      '/src/infrastructure/prisma/PrismaProductRepository.ts',
+      '/src/infrastructure/prisma/prismaRepositories/PrismaProductRepository.ts',
     ),
-    `import IProductRepository from '../../domain/repository/productRepository';
-import IProduct from '../../domain/model/IProduct';
-import prisma from '../prisma/PrismaClient';
+    `import IProductRepository from '../../../domain/repository/productRepository';
+import IProduct from '../../../domain/model/IProduct';
+import prisma from '../../prisma/PrismaClient';
 
 class PrismaProductRepository implements IProductRepository {
   async create(data: any): Promise<any> {
@@ -71,6 +71,7 @@ class PrismaProductRepository implements IProductRepository {
 }
 
 export default PrismaProductRepository;
+
 `,
   );
 }

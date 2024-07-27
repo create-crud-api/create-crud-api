@@ -7,10 +7,9 @@ import createPresentation from './presentation/createPresentation';
 import createModels from './domain/repository/createRepository';
 import createRepository from './domain/models/createModels';
 import createApplication from './application/createApplication';
-import createInfrastructure from './infrastructure/createinfrastructure';
+import createInfrastructure from './infrastructure/createInfrastructure';
 import createDotEnv from './createDotEnv';
 import createBasicStructure from './createBasicStructure';
-import runPrismaScripts from './infrastructure/runPrismaScripts';
 
 class ExpressProject implements ProjectStrategy {
   execute(projectName: string, orm: string) {
@@ -21,12 +20,11 @@ class ExpressProject implements ProjectStrategy {
     createEsLintConfig(projectName);
     createPrettierrcConfig(projectName);
     createTsconfig(projectName);
-    createPresentation(projectName);
+    createPresentation(projectName, orm);
     createModels(projectName);
     createRepository(projectName);
     createApplication(projectName);
-    createInfrastructure(projectName);
-    runPrismaScripts(projectName);
+    createInfrastructure(projectName, orm);
   }
 }
 

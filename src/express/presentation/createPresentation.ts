@@ -1,26 +1,27 @@
 import fs from 'fs-extra';
 import path from 'path';
+import { capitalizeFirstLetter } from '../../utils';
 
-function createRouter(projectDir: string): void {
+function createRouter(projectDir: string, orm: string): void {
   fs.writeFileSync(
     path.join(projectDir, '/src/presentation/api/product/index.ts'),
     `import express from 'express';
-    import ProductController from './productController';
-    import ProductUsecase from '../../../application/ProductUsecase';
-    import ProductRepository from '../../../infrastructure/prisma/PrismaProductRepository';
-    
-    const router = express.Router();
-    const productRepository = new ProductRepository();
-    const productUsecase = new ProductUsecase(productRepository);
-    const productController = new ProductController(productUsecase); 
-    
-    router.get('/product', productController.getProducts);
-    router.post('/product', productController.createProduct);
-    router.get('/product/:id', productController.getProductById);
-    router.put('/product/:id', productController.updateProduct);
-    router.delete('/product/:id', productController.deleteProduct);
-    
-    export default router;
+import ProductController from './productController';
+import ProductUsecase from '../../../application/ProductUsecase';
+import ProductRepository from '../../../infrastructure/${orm}/${orm}Repositories/${capitalizeFirstLetter(orm)}ProductRepository';
+
+const router = express.Router();
+const productRepository = new ProductRepository();
+const productUsecase = new ProductUsecase(productRepository);
+const productController = new ProductController(productUsecase); 
+
+router.get('/', productController.getProducts);
+router.post('/', productController.createProduct);
+router.get('/:id', productController.getProductById);
+router.put('/:id', productController.updateProduct);
+router.delete('/:id', productController.deleteProduct);
+
+export default router;
 `,
   );
 }
@@ -98,10 +99,11 @@ function createIndex(projectDir: string): void {
     path.join(projectDir, '/src/presentation/api/index.ts'),
     `import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
-import api from './product';
+dotenv.config();
 
-require('dotenv').config();
+import product from './product';
 
 function main() {
   const app = express();
@@ -112,17 +114,20 @@ function main() {
 
   app.get('/', (req, res) => {
     return res.json({
-      message: 'Hello World',
+      message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',
     });
   });
 
-  // middle ware to catch all thrown errors
-  app.use('/api/v1', api);
+  const apiRouter = express.Router();
+
+  apiRouter.use('/product', product);
+
+  app.use('/api/v1', apiRouter);
+
   // @ts-ignore
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   app.use((err, req, res, _next) => {
-    // console.error(err.stack);
-    res.status(err.status || 500).json({ message: err.message });
+    res.status(err.status).json({ message: err.message });
   });
 
   app.listen(port, () => {
@@ -136,10 +141,10 @@ export default main;
   );
 }
 
-export default function createPresentation(projectName: string): void {
+export default function createPresentation(projectName: string, orm: string): void {
   const projectDir = path.join(process.cwd(), projectName);
   fs.mkdirSync(path.join(projectDir, '/src/presentation/api/product'));
-  createRouter(projectDir);
+  createRouter(projectDir, orm);
   createController(projectDir);
   createIndex(projectDir);
 }

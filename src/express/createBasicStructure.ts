@@ -12,14 +12,11 @@ export default function createBasicStructure(projectName: string): void {
   fs.mkdirSync(projectDir);
 
   // Create basic structure
-  fs.mkdirSync(path.join(projectDir, 'src'));
-  fs.mkdirSync(path.join(projectDir, '/src/application'));
+  fs.mkdirSync(path.join(projectDir, '/src/application/Errors'), { recursive: true });
   fs.mkdirSync(path.join(projectDir, '/src/infrastructure'));
-  fs.mkdirSync(path.join(projectDir, '/src/presentation'));
-  fs.mkdirSync(path.join(projectDir, '/src/presentation/api'));
-  fs.mkdirSync(path.join(projectDir, '/src/domain'));
-  fs.mkdirSync(path.join(projectDir, '/src/domain/model'));
-  fs.mkdirSync(path.join(projectDir, '/src/domain/repository'));
+  fs.mkdirSync(path.join(projectDir, '/src/presentation/api'), { recursive: true });
+  fs.mkdirSync(path.join(projectDir, '/src/domain/model'), { recursive: true });
+  fs.mkdirSync(path.join(projectDir, '/src/domain/repository'), { recursive: true });
   fs.writeFileSync(
     path.join(projectDir, 'src', 'index.ts'),
     `import main from './presentation/api';

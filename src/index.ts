@@ -26,6 +26,10 @@ async function main() {
         name: 'Prisma',
         value: 'prisma',
       },
+      {
+        name: 'Mongoose',
+        value: 'mongoose',
+      },
     ],
   });
   await createProject(projectName, framework, orm);
