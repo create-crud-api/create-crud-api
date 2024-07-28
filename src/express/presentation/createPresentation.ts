@@ -1,100 +1,126 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { capitalizeFirstLetter } from '../../utils';
+import { Schema } from '../../interfaces';
 
-function createRouter(projectDir: string, orm: string): void {
-  fs.writeFileSync(
-    path.join(projectDir, '/src/presentation/api/product/index.ts'),
-    `import express from 'express';
-import ProductController from './productController';
-import ProductUsecase from '../../../application/ProductUsecase';
-import ProductRepository from '../../../infrastructure/${orm}/${orm}Repositories/${capitalizeFirstLetter(orm)}ProductRepository';
+function createRouter(projectDir: string, orm: string, schema: Schema): void {
+  const schemaKeys = Object.keys(schema);
+  schemaKeys.forEach((key) => {
+    const k = key.toLowerCase();
+    fs.writeFileSync(
+      path.join(projectDir, `/src/presentation/api/${k}/index.ts`),
+      `import express from 'express';
+import ${key}Controller from './${k}Controller';
+import ${key}Usecase from '../../../application/${key}Usecase';
+import ${key}Repository from '../../../infrastructure/${orm}/${orm}Repositories/${capitalizeFirstLetter(
+  orm,
+)}${key}Repository';
 
 const router = express.Router();
-const productRepository = new ProductRepository();
-const productUsecase = new ProductUsecase(productRepository);
-const productController = new ProductController(productUsecase); 
+const ${k}Repository = new ${key}Repository();
+const ${k}Usecase = new ${key}Usecase(${k}Repository);
+const ${k}Controller = new ${key}Controller(${k}Usecase); 
 
-router.get('/', productController.getProducts);
-router.post('/', productController.createProduct);
-router.get('/:id', productController.getProductById);
-router.put('/:id', productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
+router.get('/', ${k}Controller.get${key}s);
+router.post('/', ${k}Controller.create${key});
+router.get('/:id', ${k}Controller.get${key}ById);
+router.put('/:id', ${k}Controller.update${key});
+router.delete('/:id', ${k}Controller.delete${key});
 
 export default router;
 `,
-  );
+    );
+  });
 }
 
-function createController(projectDir: string): void {
-  fs.writeFileSync(
-    path.join(projectDir, '/src/presentation/api/product/productController.ts'),
-    `import { NextFunction, Request, Response } from 'express';
-import PorductUseCase from '../../../application/ProductUsecase';
+function createController(projectDir: string, schema: Schema): void {
+  const schemaKeys = Object.keys(schema);
+  schemaKeys.forEach((key) => {
+    const k = key.toLowerCase();
+    fs.writeFileSync(
+      path.join(projectDir, `/src/presentation/api/${k}/${k}Controller.ts`),
+      `import { NextFunction, Request, Response } from 'express';
+import ${key}UseCase from '../../../application/${key}Usecase';
 
-class ProductController {
-  constructor(private readonly porductUseCase: PorductUseCase) {}
+class ${key}Controller {
+  constructor(private readonly ${k}UseCase: ${key}UseCase) {}
 
-  createProduct = async (req: Request, res: Response, next: NextFunction) => {
+  create${key} = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const product = req.body;
-      const newProduct = await this.porductUseCase.createProduct(product);
-      res.status(201).json(newProduct);
+      const ${k} = req.body;
+      const new${key} = await this.${k}UseCase.create${key}(${k});
+      res.status(201).json(new${key});
     } catch (error: any) {
       next(error);
     }
   };
 
-  getProductById = async (req: Request, res: Response, next: NextFunction) => {
+  get${key}ById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const product = await this.porductUseCase.getProductById(id);
-      res.status(200).json(product);
+      const ${k} = await this.${k}UseCase.get${key}ById(id);
+      res.status(200).json(${k});
     } catch (error: any) {
       next(error);
     }
   };
 
-  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+  update${key} = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const product = req.body;
-      const updatedProduct = await this.porductUseCase.updateProduct(
+      const ${k} = req.body;
+      const updated${key} = await this.${k}UseCase.update${key}(
         id,
-        product,
+        ${k},
       );
-      res.status(200).json(updatedProduct);
+      res.status(200).json(updated${key});
     } catch (error: any) {
       next(error);
     }
   };
 
-  deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+  delete${key} = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      await this.porductUseCase.deleteProduct(id);
+      await this.${k}UseCase.delete${key}(id);
       res.status(204).json();
     } catch (error: any) {
       next(error);
     }
   };
 
-  getProducts = async (req: Request, res: Response, next: NextFunction) => {
+  get${key}s = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const products = await this.porductUseCase.getProducts();
-      res.status(200).json(products);
+      const ${k}s = await this.${k}UseCase.get${key}s();
+      res.status(200).json(${k}s);
     } catch (error: any) {
       next(error);
     }
   };
 }
-export default ProductController;
+export default ${key}Controller;
 
 `,
-  );
+    );
+  });
 }
 
-function createIndex(projectDir: string): void {
+function createIndex(projectDir: string, schema: Schema): void {
+  const schemaKeys = Object.keys(schema);
+  const schemaImports = schemaKeys
+    .map((key) => {
+      const k = key.toLowerCase();
+      return `import ${k} from './${k}';`;
+    })
+    .join('\n');
+
+  const schemaRouters = schemaKeys
+    .map((key) => {
+      const k = key.toLowerCase();
+      return `apiRouter.use('/${k}', ${k});`;
+    })
+    .join('\n  ');
+
   fs.writeFileSync(
     path.join(projectDir, '/src/presentation/api/index.ts'),
     `import express from 'express';
@@ -103,7 +129,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import product from './product';
+${schemaImports}
 
 function main() {
   const app = express();
@@ -120,7 +146,7 @@ function main() {
 
   const apiRouter = express.Router();
 
-  apiRouter.use('/product', product);
+  ${schemaRouters}
 
   app.use('/api/v1', apiRouter);
 
@@ -141,10 +167,19 @@ export default main;
   );
 }
 
-export default function createPresentation(projectName: string, orm: string): void {
+export default function createPresentation(
+  projectName: string,
+  orm: string,
+  schema: Schema,
+): void {
   const projectDir = path.join(process.cwd(), projectName);
-  fs.mkdirSync(path.join(projectDir, '/src/presentation/api/product'));
-  createRouter(projectDir, orm);
-  createController(projectDir);
-  createIndex(projectDir);
+  const schemaKeys = Object.keys(schema);
+  schemaKeys.forEach((key) => {
+    fs.mkdirSync(
+      path.join(projectDir, `/src/presentation/api/${key.toLowerCase()}`),
+    );
+  });
+  createRouter(projectDir, orm, schema);
+  createController(projectDir, schema);
+  createIndex(projectDir, schema);
 }

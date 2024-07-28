@@ -1,37 +1,16 @@
 #!/usr/bin/env node
-import { select, input } from '@inquirer/prompts';
+
+import cliQuestions from './cli';
+import parseSchema from './parser';
 import createProject from './projectFactory';
 
 async function main() {
-  const projectName = await input({ message: 'Enter project name' });
-
-  const framework = await select({
-    message: 'Select a framework',
-    choices: [
-      {
-        name: 'Express',
-        value: 'express',
-      },
-      {
-        name: 'Hono',
-        value: 'hono',
-      },
-    ],
-  });
-
-  const orm = await select({
-    message: 'Select an ORM',
-    choices: [
-      {
-        name: 'Prisma',
-        value: 'prisma',
-      },
-      {
-        name: 'Mongoose',
-        value: 'mongoose',
-      },
-    ],
-  });
-  await createProject(projectName, framework, orm);
+  const { projectName, framework, orm, structure, schemaPath } = await cliQuestions();
+  const schema = parseSchema(schemaPath) || {
+    Product: { id: 'string', name: 'string', price: 'int' },
+  };
+  console.log(projectName, framework, orm, structure);
+  
+  await createProject(projectName, framework, orm, schema);
 }
 main();

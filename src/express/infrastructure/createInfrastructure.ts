@@ -1,16 +1,18 @@
 import createPrisma from './prisma';
 import createMongoose from './mongoose';
+import { Schema } from '../../interfaces';
 
-export default function createInfrastructure(
+export default async function createInfrastructure(
   projectName: string,
   orm: string,
-): void {
+  schema: Schema,
+): Promise<void> {
   switch (orm) {
     case 'prisma':
-      createPrisma(projectName);
+      await createPrisma(projectName, schema);
       break;
     case 'mongoose':
-      createMongoose(projectName);
+      await createMongoose(projectName, schema);
       break;
     default:
       console.log('Invalid ORM');

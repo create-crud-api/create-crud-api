@@ -1,4 +1,4 @@
-import { ProjectStrategy } from '../interfaces';
+import { ProjectStrategy, Schema } from '../interfaces';
 import createTsconfig from './createTsConfig';
 import createEsLintConfig from './createEsLintConfig';
 import createPackageJson from './createPackageJson';
@@ -10,9 +10,10 @@ import createApplication from './application/createApplication';
 import createInfrastructure from './infrastructure/createInfrastructure';
 import createDotEnv from './createDotEnv';
 import createBasicStructure from './createBasicStructure';
+import installAndLint from './installAndLint';
 
 class ExpressProject implements ProjectStrategy {
-  execute(projectName: string, orm: string) {
+  async execute(projectName: string, orm: string, schema: Schema) {
     console.log(`Creating Express project with ${projectName} and ${orm}`);
     createBasicStructure(projectName);
     createDotEnv(projectName);
@@ -20,11 +21,12 @@ class ExpressProject implements ProjectStrategy {
     createEsLintConfig(projectName);
     createPrettierrcConfig(projectName);
     createTsconfig(projectName);
-    createPresentation(projectName, orm);
-    createModels(projectName);
-    createRepository(projectName);
-    createApplication(projectName);
-    createInfrastructure(projectName, orm);
+    createPresentation(projectName, orm, schema);
+    createModels(projectName, schema);
+    createRepository(projectName, schema);
+    createApplication(projectName, schema);
+    await createInfrastructure(projectName, orm, schema);
+    installAndLint(projectName);
   }
 }
 

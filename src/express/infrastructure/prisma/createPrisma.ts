@@ -1,9 +1,36 @@
 import fs from 'fs-extra';
 import path from 'path';
+import { Schema } from '../../../interfaces';
 
-export default function createPrismaRepository(projectName: string): void {
+function constrains(feild: string) {
+  if (feild === 'id') return '@id';
+  return '';
+}
+export default function createPrismaRepository(
+  projectName: string,
+  schema: Schema,
+): void {
   const projectDir = path.join(process.cwd(), projectName);
-  fs.mkdirSync(path.join(projectDir, '/src/infrastructure/prisma/prismaRepositories'), { recursive: true });
+  fs.mkdirSync(
+    path.join(projectDir, '/src/infrastructure/prisma/prismaRepositories'),
+    { recursive: true },
+  );
+  const typeMaper: { [key: string]: string } = { string: 'String', int: 'Int' };
+  const schemaKeys = Object.keys(schema);
+  const models = schemaKeys
+    .map((key) => {
+      let model = `model ${key} {\n`;
+      model += Object.keys(schema[key])
+        .map((feild) => {
+          return `${feild} ${typeMaper[schema[key][feild]]} ${constrains(
+            feild,
+          )}`;
+        })
+        .join('\n  ');
+      model += '\n}';
+      return model;
+    })
+    .join('\n  ');
   fs.writeFileSync(
     path.join(projectDir, '/src/infrastructure/prisma/schema.prisma'),
     `generator client {
@@ -16,14 +43,7 @@ datasource db {
 }
 
 
-model Product {
-  id          String    @id
-  name        String
-  price       Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
+${models}
 `,
   );
   fs.writeFileSync(
@@ -34,44 +54,47 @@ export default new PrismaClient();
 `,
   );
 
-  fs.writeFileSync(
-    path.join(
-      projectDir,
-      '/src/infrastructure/prisma/prismaRepositories/PrismaProductRepository.ts',
-    ),
-    `import IProductRepository from '../../../domain/repository/productRepository';
-import IProduct from '../../../domain/model/IProduct';
+  schemaKeys.forEach((key) => {
+    const k = key.toLowerCase();
+    fs.writeFileSync(
+      path.join(
+        projectDir,
+        `/src/infrastructure/prisma/prismaRepositories/Prisma${key}Repository.ts`,
+      ),
+      `import I${key}Repository from '../../../domain/repository/${k}Repository';
+import I${key} from '../../../domain/model/I${key}';
 import prisma from '../../prisma/PrismaClient';
 
-class PrismaProductRepository implements IProductRepository {
+class Prisma${key}Repository implements I${key}Repository {
   async create(data: any): Promise<any> {
-    const product = await prisma.product.create({ data });
-    return product;
+    const ${k} = await prisma.${k}.create({ data });
+    return ${k};
   }
 
-  async get(id: string): Promise<IProduct | null> {
-    const product = await prisma.product.findUnique({ where: { id } });
-    return product;
+  async get(id: string): Promise<I${key} | null> {
+    const ${k} = await prisma.${k}.findUnique({ where: { id } });
+    return ${k};
   }
 
-  async update(id: string, data: any): Promise<IProduct> {
-    const product = await prisma.product.update({ where: { id }, data });
-    return product;
+  async update(id: string, data: any): Promise<I${key}> {
+    const ${k} = await prisma.${k}.update({ where: { id }, data });
+    return ${k};
   }
 
-  async delete(id: string): Promise<IProduct> {
-    const product = await prisma.product.delete({ where: { id } });
-    return product;
+  async delete(id: string): Promise<I${key}> {
+    const ${k} = await prisma.${k}.delete({ where: { id } });
+    return ${k};
   }
 
-  async list(): Promise<IProduct[]> {
-    const product = await prisma.product.findMany();
-    return product;
+  async list(): Promise<I${key}[]> {
+    const ${k} = await prisma.${k}.findMany();
+    return ${k};
   }
 }
 
-export default PrismaProductRepository;
+export default Prisma${key}Repository;
 
 `,
-  );
+    );
+  });
 }

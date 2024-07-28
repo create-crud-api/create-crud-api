@@ -1,87 +1,109 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { spawn } from 'child_process';
+import { Schema } from '../../../interfaces';
 
-
-function createMongooseModels(projectName: string): void {
+function createMongooseModels(projectName: string, schema: Schema): void {
   const projectDir = path.join(process.cwd(), projectName);
-  fs.writeFileSync(
-    path.join(projectDir, '/src/infrastructure/mongoose/models/product.ts'),
-    `import mongoose, { Document } from 'mongoose';
-import IProduct from '../../../domain/model/IProduct';
-import { BaseSchema } from '../BaseSchema';
+  const schemaKeys = Object.keys(schema);
 
-const product = new BaseSchema({
-  id: {
-    type: String,
+  schemaKeys.forEach((key) => {
+    function constrains(feild: string) {
+      if (feild === 'id')
+        return `{
+    type: ${schema[key][feild] === 'int' ? 'Number' : 'String'},
     required: true,
     unique: true,
     IDBIndex: true,
-    trim: true,
-  },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  price: {
+    ${schema[key][feild] === 'string' ? 'trim: true,' : ''}
+  }`;
+      if (schema[key][feild] === 'string')
+        return `{
+  type: String,
+  required: true,
+  trim: true,
+  }`;
+      if (schema[key][feild] === 'int')
+        return `{
     type: Number,
     required: true,
-  },
+  }`;
+      return '';
+    }
+    const k = key.toLowerCase();
+    const fields = Object.keys(schema[key]);
+    let model = '';
+    model += fields.map((field) => {
+      console.log(model);
+      return `${field}: ${constrains(field)}\n`;
+    });
+    fs.writeFileSync(
+      path.join(projectDir, `/src/infrastructure/mongoose/models/${k}.ts`),
+      `import mongoose, { Document } from 'mongoose';
+import I${key} from '../../../domain/model/I${key}';
+import { BaseSchema } from '../BaseSchema';
+
+const ${k} = new BaseSchema({
+  ${model}
 });
 
-export const Product = mongoose.model<IProduct & Document>('Product', product);
+export const ${key} = mongoose.model<I${key} & Document>('${key}', ${k});
 `,
-  );
+    );
+  });
 }
 
-function createMongooseRepository(projectName: string): void {
+function createMongooseRepository(projectName: string, schema: Schema): void {
   const projectDir = path.join(process.cwd(), projectName);
-  fs.writeFileSync(
-    path.join(
-      projectDir,
-      '/src/infrastructure/mongoose/mongooseRepositories/MongooseProductRepository.ts',
-    ),
-    `import IProductRepository from '../../../domain/repository/productRepository';
-import IProduct from '../../../domain/model/IProduct';
-import { Product } from '../models/product';
+  const schemaKeys = Object.keys(schema);
+  schemaKeys.forEach((key) => {
+    const k = key.toLowerCase();
+    fs.writeFileSync(
+      path.join(
+        projectDir,
+        `/src/infrastructure/mongoose/mongooseRepositories/Mongoose${key}Repository.ts`,
+      ),
+      `import I${key}Repository from '../../../domain/repository/${k}Repository';
+import I${key} from '../../../domain/model/I${key}';
+import { ${key} } from '../models/${k}';
 import connect from '../connection';
 
-class MongooseProductRepository implements IProductRepository {
+class Mongoose${key}Repository implements I${key}Repository {
 
   constructor() {
     connect(); 
   }
 
-  async create(data: any): Promise<IProduct> {
-    const product = await Product.create(data);
-    return product;
+  async create(data: any): Promise<I${key}> {
+    const ${k} = await ${key}.create(data);
+    return ${k};
   }
 
-  async get(id: string): Promise<IProduct | null> {
-    const product = await Product.findOne({ id });
-    return product;
+  async get(id: string): Promise<I${key} | null> {
+    const ${k} = await ${key}.findOne({ id });
+    return ${k};
   }
 
-  async update(id: string, data: any): Promise<IProduct | null> {
-    const product = await Product.findOneAndUpdate({ id }, data, { new: true });
-    return product;
+  async update(id: string, data: any): Promise<I${key} | null> {
+    const ${k} = await ${key}.findOneAndUpdate({ id }, data, { new: true });
+    return ${k};
   }
 
-  async delete(id: string): Promise<IProduct | null> {
-    const product = await Product.findOneAndDelete({ id });
-    return product;
+  async delete(id: string): Promise<I${key} | null> {
+    const ${k} = await ${key}.findOneAndDelete({ id });
+    return ${k};
   }
 
-  async list(): Promise<IProduct[]> {
-    const products = await Product.find();
-    return products;
+  async list(): Promise<I${key}[]> {
+    const ${k}s = await ${key}.find();
+    return ${k}s;
   }
 }
 
-export default MongooseProductRepository;
+export default Mongoose${key}Repository;
 `,
-  );
+    );
+  });
 }
 
 function createConnection(projectName: string): void {
@@ -135,28 +157,32 @@ export class BaseSchema extends Schema {
   );
 }
 
-
 function installMongoose(projectName: string) {
-  const p = spawn(
-    'sh',
-    [
-      '-c',
-      `cd ${projectName} && npm i && npm i mongoose`,
-    ],
-    { stdio: 'inherit' },
-  );
+  return new Promise((resolve, reject) => {
+    const p = spawn('sh', ['-c', `cd ${projectName} && npm i mongoose`], {
+      stdio: 'inherit',
+    });
 
-  p.on('data', (data) => {
-    console.log(data.toString());
-  });
+    p.on('data', (data) => {
+      console.log(data.toString());
+    });
 
-  p.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
+    p.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+      resolve('done');
+    });
+
+    p.on('error', (err) => {
+      console.log(err);
+      reject(err);
+    });
   });
 }
 
-
-export default function createMongoose(projectName: string): void {
+export default async function createMongoose(
+  projectName: string,
+  schema: Schema,
+): Promise<void> {
   const projectDir = path.join(process.cwd(), projectName);
 
   fs.mkdirSync(
@@ -168,7 +194,7 @@ export default function createMongoose(projectName: string): void {
   });
   createBaseSchema(projectName);
   createConnection(projectName);
-  createMongooseModels(projectName);
-  createMongooseRepository(projectName);
-  installMongoose(projectName);
+  createMongooseModels(projectName, schema);
+  createMongooseRepository(projectName, schema);
+  await installMongoose(projectName);
 }

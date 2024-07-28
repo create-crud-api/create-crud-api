@@ -1,10 +1,10 @@
 {
-  "name": "tutture-create-crud-api",
+  "name": "tuttrue-create-crud-api",
   "version": "0.0.1",
   "description": " A basic starter for an express.js API with Typescript",
   "main": "src/index.ts",
   "bin": {
-    "tuttrue-create-crud-app": "dist/index.js"
+    "tuttrue-create-crud-api": "dist/index.js"
   },
   "scripts": {
     "start": "rm -r test; ts-node src/index.ts",
@@ -19,7 +19,6 @@
   "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^5.3.2",
-    "@prisma/client": "^5.17.0",
     "commander": "^12.1.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^10.1.2"
@@ -34,7 +33,6 @@
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
-    "prisma": "^5.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   }

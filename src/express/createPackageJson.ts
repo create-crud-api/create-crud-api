@@ -7,7 +7,7 @@ export default function createPackageJson(projectName: string): void {
     path.join(projectDir, 'package.json'),
     `{
   "name": "${projectName.toLowerCase()}",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "A basic starter for an express.js API with Typescript",
   "main": "src/index.ts",
   "scripts": {
@@ -15,14 +15,12 @@ export default function createPackageJson(projectName: string): void {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start:dist": "node dist/src/index.js",
-    "lint": "eslint --fix src test",
-    "test": "jest",
+    "lint": "eslint --fix src",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^5.17.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"

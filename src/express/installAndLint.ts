@@ -1,13 +1,10 @@
 import { spawn } from 'child_process';
-
-export default function runPrismaScripts(projectName: string) {
+export default function installAndLint(projectName: string) {
   return new Promise((resolve, reject) => {
     const p = spawn(
       'sh',
-      [
-        '-c',
-        `cd ${projectName} && npm i prisma --save-dev && npx prisma format --schema=./src/infrastructure/prisma/schema.prisma && npx prisma generate --schema=./src/infrastructure/prisma/schema.prisma && npx prisma db push --schema=./src/infrastructure/prisma/schema.prisma`,
-      ],
+      ['-c', `cd ${projectName} && npm i && npm run lint`],
+
       { stdio: 'inherit' },
     );
 
@@ -19,7 +16,6 @@ export default function runPrismaScripts(projectName: string) {
       console.log(`child process exited with code ${code}`);
       resolve('done');
     });
-
     p.on('error', (err) => {
       console.log(err);
       reject(err);

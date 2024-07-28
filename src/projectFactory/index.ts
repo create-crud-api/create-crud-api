@@ -1,6 +1,6 @@
 import ExpressProject from '../express';
 import HonoProject from '../hono';
-import { ProjectStrategy } from '../interfaces';
+import { ProjectStrategy, Schema } from '../interfaces';
 
 class ProjectFactory {
   static createProject(type: string): ProjectStrategy {
@@ -14,13 +14,14 @@ class ProjectFactory {
     }
   }
 }
-function createProject(
+async function createProject(
   projectName: string,
   framework: string,
   orm: string,
-): void {
+  schema: Schema,
+): Promise<void> {
   const project = ProjectFactory.createProject(framework);
-  project.execute(projectName, orm);
+  project.execute(projectName, orm, schema);
 }
 
 export default createProject;
