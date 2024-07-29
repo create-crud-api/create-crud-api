@@ -3,12 +3,12 @@ import HonoProject from '../hono';
 import { ProjectStrategy, Schema } from '../interfaces';
 
 class ProjectFactory {
-  static createProject(type: string): ProjectStrategy {
+  static createProject(type: string, structure: string): ProjectStrategy {
     switch (type) {
       case 'express':
-        return new ExpressProject();
+        return new ExpressProject(structure);
       case 'hono':
-        return new HonoProject();
+        return new HonoProject(structure);
       default:
         throw new Error('Unknown project type');
     }
@@ -19,8 +19,9 @@ async function createProject(
   framework: string,
   orm: string,
   schema: Schema,
+  structure: string,
 ): Promise<void> {
-  const project = ProjectFactory.createProject(framework);
+  const project = ProjectFactory.createProject(framework, structure);
   project.execute(projectName, orm, schema);
 }
 

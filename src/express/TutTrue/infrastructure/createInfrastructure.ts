@@ -1,6 +1,6 @@
 import createPrisma from './prisma';
 import createMongoose from './mongoose';
-import { Schema } from '../../interfaces';
+import { Schema } from '../../../interfaces';
 
 export default async function createInfrastructure(
   projectName: string,

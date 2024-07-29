@@ -1,9 +1,23 @@
-import { ProjectStrategy } from '../interfaces';
+import { ProjectStrategy, Schema } from '../interfaces';
+import HonoSarahProject from './Sarah';
+
+function expressFactory(structure: string) {
+  switch (structure) {
+    case 'sarah':
+      return new HonoSarahProject();
+    default:
+      throw new Error('Unknown project structure');
+  }
+}
 
 class HonoProject implements ProjectStrategy {
-  execute(projectName: string, orm: string): void {
-    console.log(`Creating Hono project with ${projectName} and ${orm}`);
-    throw new Error('Method not implemented.');
+  constructor(private structure: string) {}
+
+  async execute(projectName: string, orm: string, schema: Schema) {
+    console.log(
+      `Creating Express project with ${projectName} and ${orm}, schema: ${schema}`,
+    );
+    expressFactory(this.structure).execute(projectName, orm, schema);
   }
 }
 

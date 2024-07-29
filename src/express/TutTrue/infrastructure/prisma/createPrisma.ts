@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { Schema } from '../../../interfaces';
+import { Schema } from '../../../../interfaces';
 
 function constrains(feild: string) {
   if (feild === 'id') return '@id';

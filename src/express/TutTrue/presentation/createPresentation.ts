@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { capitalizeFirstLetter } from '../../utils';
-import { Schema } from '../../interfaces';
+import { capitalizeFirstLetter } from '../../../utils';
+import { Schema } from '../../../interfaces';
 
 function createRouter(projectDir: string, orm: string, schema: Schema): void {
   const schemaKeys = Object.keys(schema);

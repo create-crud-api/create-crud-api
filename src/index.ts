@@ -9,8 +9,7 @@ async function main() {
   const schema = parseSchema(schemaPath) || {
     Product: { id: 'string', name: 'string', price: 'int' },
   };
-  console.log(projectName, framework, orm, structure);
-  
-  await createProject(projectName, framework, orm, schema);
+
+  await createProject(projectName, framework, orm, schema, structure);
 }
 main();

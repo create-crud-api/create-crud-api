@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { spawn } from 'child_process';
-import { Schema } from '../../../interfaces';
+import { Schema } from '../../../../interfaces';
 
 function createMongooseModels(projectName: string, schema: Schema): void {
   const projectDir = path.join(process.cwd(), projectName);

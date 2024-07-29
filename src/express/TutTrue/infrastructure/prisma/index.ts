@@ -1,4 +1,4 @@
-import { Schema } from '../../../interfaces';
+import { Schema } from '../../../../interfaces';
 import createPrismaRepository from './createPrisma';
 import runPrismaScripts from './runPrismaScripts';
 
