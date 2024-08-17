@@ -1,10 +1,10 @@
 import { ProjectStrategy, Schema } from '../interfaces';
-import HonoSarahProject from './Sarah';
+import HonoTempProject from './Temp';
 
 function expressFactory(structure: string) {
   switch (structure) {
-    case 'sarah':
-      return new HonoSarahProject();
+    case 'temp':
+      return new HonoTempProject();
     default:
       throw new Error('Unknown project structure');
   }

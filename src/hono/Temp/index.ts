@@ -1,6 +1,6 @@
 import { ProjectStrategy, Schema } from '../../interfaces';
 
-class HonoSarahProject implements ProjectStrategy {
+class HonoTempProject implements ProjectStrategy {
   execute(projectName: string, orm: string, schema: Schema): void {
     console.log(
       `Creating Hono project with ${projectName} and ${orm}, schema: ${schema}`,
@@ -9,4 +9,4 @@ class HonoSarahProject implements ProjectStrategy {
   }
 }
 
-export default HonoSarahProject;
+export default HonoTempProject;

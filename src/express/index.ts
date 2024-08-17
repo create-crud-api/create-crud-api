@@ -1,13 +1,13 @@
 import { ProjectStrategy, Schema } from '../interfaces';
 import ExpressTutTrueProject from './TutTrue';
-import ExpressEmadProject from './Emad';
+import ExpressBasicProject from './Basic';
 
 function expressFactory(structure: string) {
   switch (structure) {
     case 'tuttrue':
       return new ExpressTutTrueProject();
-    case 'emad':
-      return new ExpressEmadProject();
+    case 'basic':
+      return new ExpressBasicProject();
     default:
       throw new Error('Unknown project structure');
   }

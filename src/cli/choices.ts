@@ -3,10 +3,10 @@ export const frameworks = [
     name: 'Express',
     value: 'express',
   },
-  {
-    name: 'Hono',
-    value: 'hono',
-  },
+  // {
+  //   name: 'Hono',
+  //   value: 'hono',
+  // },
 ];
 interface FrameworkOrms {
   [key: string]: { name: string; value: string }[];
@@ -33,6 +33,29 @@ export const frameworkOrms: FrameworkOrms = {
 
 export const structureCreator: { [key: string]: any } = {
   'express-prisma': [
+    {
+      name: 'Basic',
+      value: 'basic',
+      description: `.
+├── prisma
+│   └── schema.prisma
+└── src
+    ├── controllers
+    │   └── XxController.ts
+    ├── db
+    │   └── PrismaClient.ts
+    ├── errors
+    │   └── APIError.ts
+    ├── index.ts
+    ├── middleware
+    │   └── error.ts
+    └── routes
+        ├── index.ts
+        └── XxRouter.ts
+
+      `,
+    },
+
     {
       name: 'TutTrue',
       value: 'tuttrue',

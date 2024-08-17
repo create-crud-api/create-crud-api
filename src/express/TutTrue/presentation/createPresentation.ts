@@ -117,7 +117,7 @@ function createIndex(projectDir: string, schema: Schema): void {
   const schemaRouters = schemaKeys
     .map((key) => {
       const k = key.toLowerCase();
-      return `apiRouter.use('/${k}', ${k});`;
+      return `apiRouter.use('/${k}s', ${k});`;
     })
     .join('\n  ');
 
